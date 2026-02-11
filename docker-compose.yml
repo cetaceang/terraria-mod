@@ -1,0 +1,29 @@
+services:
+  terraria:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: terraria-tmodloader:local
+    container_name: terraria-tmodloader
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "7777:7777/tcp"
+    volumes:
+      - ./data/worlds:/home/terraria/.local/share/Terraria/tModLoader/Worlds
+      - ./data/mods:/home/terraria/.local/share/Terraria/tModLoader/Mods
+      - ./config/serverconfig.txt:/home/terraria/.local/share/Terraria/tModLoader/serverconfig.txt
+      - ./data/logs:/home/terraria/logs
+    mem_limit: 4g
+    cpus: 2.0
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -lc 'pgrep -f \"tModLoaderServer|start-tModLoaderServer.sh|TerrariaServer|dotnet\" >/dev/null && test -f \"$LOG_DIR/server.log\" && test $(( $(date +%s) - $(stat -c %Y \"$LOG_DIR/server.log\") )) -lt 1800'"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
