@@ -168,7 +168,7 @@ download_mod() {
   /usr/games/steamcmd \
     +login anonymous \
     +workshop_download_item "$STEAM_WORKSHOP_APP_ID" "$mod_id" validate \
-    +quit >/tmp/steamcmd_mod_${mod_id}.log 2>&1
+    +quit 2>&1 | tee /tmp/steamcmd_mod_${mod_id}.log
 
   copy_mod_files_from_workshop "$mod_id" || {
     log "steamcmd output:"
