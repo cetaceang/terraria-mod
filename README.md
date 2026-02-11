@@ -75,7 +75,7 @@ docker compose logs -f terraria
 - `Calamity Mod (灾厄本体)`：`2824688072`
 - `Calamity Music (灾厄音乐)`：`2824688266`
 - `灾厄Mod-汉化补丁`：`2825151264`
-- `Magic Storage (魔法存储)`：`2563344837`
+- `Magic Storage (魔法存储)`：`2563309347`
 - `AbsoluteAquarian Utilities`：`2908170107`
 - `AlchemistNPC Lite (炼金NPC)`：`2599842771`
 - `Quality of Terraria (更好的体验)`：`2797518634`
