@@ -7,7 +7,12 @@ RUN apt-get update \
         ca-certificates \
         curl \
         gettext-base \
+        libgcc-s1 \
+        libicu74 \
+        libssl3 \
+        libstdc++6 \
         unzip \
+        zlib1g \
         tzdata \
     && rm -rf /var/lib/apt/lists/*
 

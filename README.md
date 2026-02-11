@@ -74,3 +74,4 @@ TML_RELEASE_URL=https://github.com/tModLoader/tModLoader/releases/download/v2025
 - If tModLoader install fails, verify outbound access to GitHub release URL.
 - If mod download fails, verify outbound access to Steam and check `MOD_IDS` validity.
 - If server fails to start, check `serverconfig.txt` mount path and file permissions.
+- If startup exits with code `134`, this is usually native/.NET runtime dependency related. This image now installs common runtime libs and retries once with `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`.

@@ -80,7 +80,25 @@ start_server() {
   log "Starting tModLoader server using $server_bin"
   "$server_bin" -config "$SERVER_CONFIG_PATH" > >(tee -a "$SERVER_LOG_PATH") 2>&1 &
   SERVER_PID=$!
-  wait "$SERVER_PID"
+
+  local rc=0
+  wait "$SERVER_PID" || rc=$?
+
+  if [[ "$rc" -eq 134 ]]; then
+    log "Server exited with code 134 (abort). Printing launch logs for diagnosis..."
+    if [[ -f "$TML_INSTALL_DIR/tModLoader-Logs/Launch.log" ]]; then
+      tail -n 200 "$TML_INSTALL_DIR/tModLoader-Logs/Launch.log" || true
+    fi
+
+    log "Retrying once with DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1"
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
+      "$server_bin" -config "$SERVER_CONFIG_PATH" > >(tee -a "$SERVER_LOG_PATH") 2>&1 &
+    SERVER_PID=$!
+    rc=0
+    wait "$SERVER_PID" || rc=$?
+  fi
+
+  return "$rc"
 }
 
 main() {
