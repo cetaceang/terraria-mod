@@ -64,9 +64,13 @@ if [[ "$AUTO_DOWNLOAD_MODS" == "true" ]]; then
 
     local search_dir="$workshop_dir"
     local latest_sub
-    latest_sub=$(ls -d "$workshop_dir"/[0-9]* 2>/dev/null | sort -t. -k1,1n -k2,2n | tail -1)
+    latest_sub=$(find "$workshop_dir" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null \
+      | grep -E '^[0-9]+(\.[0-9]+)*$' \
+      | sort -V \
+      | tail -1)
     if [[ -n "$latest_sub" ]]; then
-      search_dir="$latest_sub"
+      search_dir="$workshop_dir/$latest_sub"
+      log "Using latest workshop subdir for $mod_id: $latest_sub"
     fi
 
     local tmod_file
