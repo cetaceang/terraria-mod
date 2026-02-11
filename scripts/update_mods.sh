@@ -62,22 +62,26 @@ download_mod() {
   local workshop_dir="$HOME/.local/share/Steam/steamapps/workshop/content/1281930/$mod_id"
   if [[ ! -d "$workshop_dir" ]]; then
     log "Workshop dir not found for mod $mod_id"
+    log "steamcmd output:"
+    cat /tmp/steamcmd_mod_${mod_id}.log 2>/dev/null || true
     return 1
   fi
 
   local copied=0
   shopt -s nullglob
-  for file in "$workshop_dir"/*.tmod; do
+  local tmod_file
+  for tmod_file in "$workshop_dir"/*.tmod; do
     local filename
-    filename="$(basename "$file")"
-    cp -f "$file" "$MODS_DIR/$filename"
+    filename="$(basename "$tmod_file")"
+    cp -f "$tmod_file" "$MODS_DIR/$filename"
     desired_files["$filename"]=1
     copied=1
   done
   shopt -u nullglob
 
   if [[ "$copied" -ne 1 ]]; then
-    log "No .tmod file found in $workshop_dir"
+    log "No .tmod file found in $workshop_dir, contents:"
+    ls -laR "$workshop_dir" 2>/dev/null || true
     return 1
   fi
 
