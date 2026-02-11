@@ -86,8 +86,8 @@ update_tmodloader() {
   local archive_path
   archive_path="/tmp/tmodloader-release.zip"
 
-  rm -rf "$TML_INSTALL_DIR"
-  mkdir -p "$TML_INSTALL_DIR"
+  rm -rf "${TML_INSTALL_DIR:?}"/*
+  rm -rf "$TML_INSTALL_DIR"/.[!.]* 2>/dev/null || true
 
   curl -fL --retry 3 --retry-delay 2 "$TML_RELEASE_URL" -o "$archive_path"
   unzip -qo "$archive_path" -d "$TML_INSTALL_DIR"
