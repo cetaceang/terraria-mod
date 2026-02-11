@@ -46,6 +46,8 @@ start_server() {
   local server_bin="$TML_INSTALL_DIR/start-tModLoaderServer.sh"
   if [[ ! -f "$server_bin" ]]; then
     log "Server binary not found: $server_bin"
+    log "Contents of $TML_INSTALL_DIR:"
+    ls -la "$TML_INSTALL_DIR" 2>/dev/null || true
     exit 1
   fi
   chmod +x "$server_bin"
