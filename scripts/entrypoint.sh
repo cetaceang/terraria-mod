@@ -6,7 +6,8 @@ log() {
 }
 
 AUTO_UPDATE_ON_START="${AUTO_UPDATE_ON_START:-true}"
-MOD_IDS="${MOD_IDS:-}"
+DEFAULT_TML_RELEASE_URL="https://github.com/tModLoader/tModLoader/releases/latest/download/tModLoader.zip"
+TML_RELEASE_URL="${TML_RELEASE_URL:-$DEFAULT_TML_RELEASE_URL}"
 
 mkdir -p "$TML_INSTALL_DIR" "$TML_DATA_DIR" "$WORLD_DIR" "$MODS_DIR" "$LOG_DIR"
 
@@ -34,17 +35,40 @@ validate_env() {
 }
 
 update_tmodloader() {
-  log "Updating tModLoader via SteamCMD (app ${STEAM_APP_ID})..."
-  /usr/games/steamcmd \
-    +force_install_dir "$TML_INSTALL_DIR" \
-    +login anonymous \
-    +app_update "$STEAM_APP_ID" validate \
-    +quit
+  log "Updating tModLoader..."
+
+  log "Downloading official release package: $TML_RELEASE_URL"
+  local archive_path
+  archive_path="/tmp/tmodloader-release.zip"
+
+  rm -rf "$TML_INSTALL_DIR"
+  mkdir -p "$TML_INSTALL_DIR"
+
+  curl -fL --retry 3 --retry-delay 2 "$TML_RELEASE_URL" -o "$archive_path"
+  unzip -qo "$archive_path" -d "$TML_INSTALL_DIR"
+  rm -f "$archive_path"
+
+  if ! find "$TML_INSTALL_DIR" -maxdepth 5 -type f \( -name "start-tModLoaderServer.sh" -o -name "tModLoaderServer*" \) | grep -q .; then
+    log "tModLoader install verification failed: server binary/script not found under $TML_INSTALL_DIR"
+    log "Downloaded release package does not contain server binaries."
+    log "Contents:"
+    find "$TML_INSTALL_DIR" -maxdepth 4 -ls 2>/dev/null || true
+    exit 1
+  fi
+
+  log "tModLoader installed from release package."
 }
 
 start_server() {
   local server_bin
-  server_bin=$(find "$TML_INSTALL_DIR" -name "start-tModLoaderServer.sh" -type f 2>/dev/null | head -1)
+  if [[ -f "$TML_INSTALL_DIR/start-tModLoaderServer.sh" ]]; then
+    server_bin="$TML_INSTALL_DIR/start-tModLoaderServer.sh"
+  elif [[ -f "$TML_INSTALL_DIR/steamapps/common/tModLoader/start-tModLoaderServer.sh" ]]; then
+    server_bin="$TML_INSTALL_DIR/steamapps/common/tModLoader/start-tModLoaderServer.sh"
+  else
+    server_bin=$(find "$TML_INSTALL_DIR" -name "start-tModLoaderServer.sh" -type f 2>/dev/null | head -1)
+  fi
+
   if [[ -z "$server_bin" ]]; then
     log "start-tModLoaderServer.sh not found under $TML_INSTALL_DIR"
     log "Contents:"
@@ -69,7 +93,7 @@ main() {
     log "AUTO_UPDATE_ON_START=false, skip tModLoader update."
   fi
 
-  /opt/terraria/scripts/update_mods.sh "$MOD_IDS"
+  /opt/terraria/scripts/update_mods.sh
   start_server
 }
 
