@@ -26,10 +26,6 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 validate_env() {
-  if [[ -z "$MOD_IDS" ]]; then
-    log "Warning: MOD_IDS is empty. Server will start without workshop mod sync."
-  fi
-
   if [[ ! -f "$SERVER_CONFIG_PATH" ]]; then
     log "Missing required config file: $SERVER_CONFIG_PATH"
     log "Please mount ./config/serverconfig.txt to $SERVER_CONFIG_PATH"
@@ -46,46 +42,16 @@ update_tmodloader() {
     +quit
 }
 
-find_server_binary() {
-  local candidates=(
-    "$TML_INSTALL_DIR/start-tModLoaderServer.sh"
-    "$TML_INSTALL_DIR/start-tModLoaderServer"
-    "$TML_INSTALL_DIR/tModLoaderServer"
-  )
-
-  for path in "${candidates[@]}"; do
-    if [[ -x "$path" ]]; then
-      echo "$path"
-      return 0
-    fi
-  done
-
-  local discovered
-  discovered="$(find "$TML_INSTALL_DIR" -maxdepth 2 -type f \( -name 'start-tModLoaderServer.sh' -o -name 'tModLoaderServer' \) | head -n 1 || true)"
-  if [[ -n "$discovered" ]]; then
-    chmod +x "$discovered" || true
-    echo "$discovered"
-    return 0
-  fi
-
-  return 1
-}
-
 start_server() {
-  local server_bin
-  if ! server_bin="$(find_server_binary)"; then
-    log "Could not find tModLoader server startup script in $TML_INSTALL_DIR"
+  local server_bin="$TML_INSTALL_DIR/start-tModLoaderServer.sh"
+  if [[ ! -f "$server_bin" ]]; then
+    log "Server binary not found: $server_bin"
     exit 1
   fi
-
-  chmod +x "$server_bin" || true
+  chmod +x "$server_bin"
 
   log "Starting tModLoader server using $server_bin"
-  if [[ "$server_bin" == *.sh ]]; then
-    bash "$server_bin" -config "$SERVER_CONFIG_PATH" > >(tee -a "$SERVER_LOG_PATH") 2>&1 &
-  else
-    "$server_bin" -config "$SERVER_CONFIG_PATH" > >(tee -a "$SERVER_LOG_PATH") 2>&1 &
-  fi
+  "$server_bin" -config "$SERVER_CONFIG_PATH" > >(tee -a "$SERVER_LOG_PATH") 2>&1 &
   SERVER_PID=$!
   wait "$SERVER_PID"
 }

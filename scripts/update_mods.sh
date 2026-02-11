@@ -20,11 +20,10 @@ retry() {
 
 MOD_IDS_RAW="${1:-${MOD_IDS:-}}"
 CLEAN_OLD_MODS="${CLEAN_OLD_MODS:-true}"
-DOWNLOAD_DIR="${HOME}/mod-downloads"
 FAILURES=()
 declare -A desired_files=()
 
-mkdir -p "$MODS_DIR" "$DOWNLOAD_DIR"
+mkdir -p "$MODS_DIR"
 
 if [[ -z "$MOD_IDS_RAW" ]]; then
   log "MOD_IDS empty, skip workshop sync."
@@ -115,7 +114,7 @@ fi
 
 enabled_json="$MODS_DIR/enabled.json"
 {
-  printf '{\n  "mods": [\n'
+  printf '[\n'
   mod_names=()
   shopt -s nullglob
   for modfile in "$MODS_DIR"/*.tmod; do
@@ -126,12 +125,12 @@ enabled_json="$MODS_DIR/enabled.json"
   for idx in "${!mod_names[@]}"; do
     name="${mod_names[$idx]}"
     if (( idx + 1 < ${#mod_names[@]} )); then
-      printf '    "%s",\n' "$name"
+      printf '  "%s",\n' "$name"
     else
-      printf '    "%s"\n' "$name"
+      printf '  "%s"\n' "$name"
     fi
   done
-  printf '  ]\n}\n'
+  printf ']\n'
 } > "$enabled_json"
 
 log "Wrote enabled mod list: $enabled_json"
