@@ -59,7 +59,7 @@ download_mod() {
     +workshop_download_item 1281930 "$mod_id" validate \
     +quit >/tmp/steamcmd_mod_${mod_id}.log 2>&1
 
-  local workshop_dir="$HOME/Steam/steamapps/workshop/content/1281930/$mod_id"
+  local workshop_dir="$HOME/.local/share/Steam/steamapps/workshop/content/1281930/$mod_id"
   if [[ ! -d "$workshop_dir" ]]; then
     log "Workshop dir not found for mod $mod_id"
     return 1
