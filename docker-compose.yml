@@ -14,6 +14,7 @@ services:
       - ./data/worlds:/root/.local/share/Terraria/tModLoader/Worlds
       - ./data/mods:/root/.local/share/Terraria/tModLoader/Mods
       - ./config/serverconfig.txt:/root/.local/share/Terraria/tModLoader/serverconfig.txt
+      - ./data/tmodloader:/root/tmodloader
       - ./data/logs:/root/logs
       - ./data/steam:/root/.local/share/Steam
     healthcheck:
