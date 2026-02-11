@@ -69,8 +69,18 @@ download_mod() {
 
   local copied=0
   shopt -s nullglob
+
+  # Workshop may store .tmod in versioned subdirs (e.g. 2025.12/).
+  # Find the latest version dir, fall back to top-level.
+  local search_dir="$workshop_dir"
+  local latest_sub
+  latest_sub=$(ls -d "$workshop_dir"/[0-9]* 2>/dev/null | sort -t. -k1,1n -k2,2n | tail -1)
+  if [[ -n "$latest_sub" ]]; then
+    search_dir="$latest_sub"
+  fi
+
   local tmod_file
-  for tmod_file in "$workshop_dir"/*.tmod; do
+  for tmod_file in "$search_dir"/*.tmod; do
     local filename
     filename="$(basename "$tmod_file")"
     cp -f "$tmod_file" "$MODS_DIR/$filename"
