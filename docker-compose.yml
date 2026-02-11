@@ -15,6 +15,7 @@ services:
       - ./data/mods:/root/.local/share/Terraria/tModLoader/Mods
       - ./config/serverconfig.txt:/root/.local/share/Terraria/tModLoader/serverconfig.txt
       - ./data/logs:/root/logs
+      - ./data/steam:/root/.local/share/Steam
     mem_limit: 4g
     cpus: 2.0
     healthcheck:
