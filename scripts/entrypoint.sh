@@ -43,11 +43,12 @@ update_tmodloader() {
 }
 
 start_server() {
-  local server_bin="$TML_INSTALL_DIR/start-tModLoaderServer.sh"
-  if [[ ! -f "$server_bin" ]]; then
-    log "Server binary not found: $server_bin"
-    log "Contents of $TML_INSTALL_DIR:"
-    ls -la "$TML_INSTALL_DIR" 2>/dev/null || true
+  local server_bin
+  server_bin=$(find "$TML_INSTALL_DIR" -name "start-tModLoaderServer.sh" -type f 2>/dev/null | head -1)
+  if [[ -z "$server_bin" ]]; then
+    log "start-tModLoaderServer.sh not found under $TML_INSTALL_DIR"
+    log "Contents:"
+    find "$TML_INSTALL_DIR" -maxdepth 3 -ls 2>/dev/null || true
     exit 1
   fi
   chmod +x "$server_bin"
