@@ -7,6 +7,7 @@ RUN apt-get update \
         ca-certificates \
         curl \
         gettext-base \
+        jq \
         libgcc-s1 \
         libicu74 \
         libssl3 \

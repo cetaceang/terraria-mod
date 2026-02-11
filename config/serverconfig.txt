@@ -1,5 +1,5 @@
-worldpath=/home/terraria/.local/share/Terraria/tModLoader/Worlds
-world=/home/terraria/.local/share/Terraria/tModLoader/Worlds/CalamityWorld.wld
+worldpath=/root/.local/share/Terraria/tModLoader/Worlds
+world=/root/.local/share/Terraria/tModLoader/Worlds/CalamityWorld.wld
 autocreate=3
 difficulty=2
 seed=3.1.2.0.20260211

@@ -8,6 +8,7 @@ log() {
 AUTO_UPDATE_ON_START="${AUTO_UPDATE_ON_START:-true}"
 DEFAULT_TML_RELEASE_URL="https://github.com/tModLoader/tModLoader/releases/latest/download/tModLoader.zip"
 TML_RELEASE_URL="${TML_RELEASE_URL:-$DEFAULT_TML_RELEASE_URL}"
+TML_RELEASE_STATE_PATH="${LOG_DIR}/.tml_release_state.json"
 
 mkdir -p "$TML_INSTALL_DIR" "$TML_DATA_DIR" "$WORLD_DIR" "$MODS_DIR" "$LOG_DIR"
 
@@ -34,8 +35,52 @@ validate_env() {
   fi
 }
 
+resolve_tml_release_key() {
+  if [[ "$TML_RELEASE_URL" == "$DEFAULT_TML_RELEASE_URL" ]]; then
+    local tag_name
+    tag_name=$(curl -fsSL "https://api.github.com/repos/tModLoader/tModLoader/releases/latest" \
+      | jq -r '.tag_name // empty' 2>/dev/null || true)
+    if [[ -n "$tag_name" ]]; then
+      echo "latest:${tag_name}"
+      return 0
+    fi
+    log "Failed to resolve latest tag from GitHub API, fallback to URL key."
+  fi
+
+  echo "custom:${TML_RELEASE_URL}"
+}
+
+is_tml_installed() {
+  if [[ -f "$TML_INSTALL_DIR/start-tModLoaderServer.sh" ]]; then
+    return 0
+  fi
+
+  if find "$TML_INSTALL_DIR" -maxdepth 5 -type f \( -name "start-tModLoaderServer.sh" -o -name "tModLoaderServer*" \) | grep -q .; then
+    return 0
+  fi
+
+  return 1
+}
+
 update_tmodloader() {
   log "Updating tModLoader..."
+
+  local target_key current_key
+  target_key="$(resolve_tml_release_key)"
+  current_key=""
+
+  if [[ -f "$TML_RELEASE_STATE_PATH" ]]; then
+    current_key=$(jq -r '.release_key // empty' "$TML_RELEASE_STATE_PATH" 2>/dev/null || true)
+  fi
+
+  if [[ -n "$current_key" ]] && [[ "$current_key" == "$target_key" ]] && is_tml_installed; then
+    log "tModLoader release unchanged ($target_key), skip download."
+    return
+  fi
+
+  if [[ -n "$current_key" ]] && [[ "$current_key" == "$target_key" ]]; then
+    log "Release key unchanged but installation missing, reinstalling."
+  fi
 
   log "Downloading official release package: $TML_RELEASE_URL"
   local archive_path
@@ -56,7 +101,13 @@ update_tmodloader() {
     exit 1
   fi
 
-  log "tModLoader installed from release package."
+  local state_tmp
+  state_tmp="${TML_RELEASE_STATE_PATH}.tmp"
+  jq -n --arg key "$target_key" --arg url "$TML_RELEASE_URL" --arg updated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '{release_key:$key, release_url:$url, updated_at:$updated_at}' > "$state_tmp"
+  mv -f "$state_tmp" "$TML_RELEASE_STATE_PATH"
+
+  log "tModLoader installed from release package ($target_key)."
 }
 
 start_server() {
