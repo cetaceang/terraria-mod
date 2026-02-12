@@ -13,6 +13,7 @@ services:
     volumes:
       - ./data/worlds:/root/.local/share/Terraria/tModLoader/Worlds
       - ./data/mods:/root/.local/share/Terraria/tModLoader/Mods
+      - ./data/modconfigs:/root/.local/share/Terraria/tModLoader/ModConfigs
       - ./config/serverconfig.txt:/root/.local/share/Terraria/tModLoader/serverconfig.txt
       - ./data/tmodloader:/root/tmodloader
       - ./data/logs:/root/logs
